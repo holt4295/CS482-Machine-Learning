@@ -4,27 +4,27 @@ Garrett Holtz
 Sean Timkovich-Camp
 
 Assignment 2
-
-TO DO:
-    1. Print first 5 datasets
-    2. Scatterplot
-    3. Split training and test data
-    4. Compute best # of neighbors to use
-    5. Train data using 5-fold StratifiedKFold
 """
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import math
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
 
-
+"""
+Global Declarations
+"""
 filePath = "modified_wdbc.csv"
 headers = []
 target_name = []
 targets = np.array([])
 data = []
+
+X_train = np.array([])
+X_test = np.array([])
+Y_train = np.array([])
+Y_test = np.array([])
 
 """
 
@@ -96,7 +96,6 @@ def createHistograms():
 """
 
 """
-
 def createScatterPlot():
     print("\nRunning createScatterPlot")
     #perimeter x symmetry
@@ -135,7 +134,13 @@ def createScatterPlot():
 """
 def findK():
     print("\nRunning findK")
+    global X_train
+    global X_test
+    global Y_train
+    global Y_test
     X_train, X_test, Y_train, Y_test = train_test_split(data, targets, random_state=42)
+    
+    print(len(X_train), len(Y_train), len(X_test), len(Y_test))
     
     trainingAccuracy = np.array([])
     testingAccuracy = np.array([])
@@ -149,21 +154,30 @@ def findK():
         trainingAccuracy = np.append(trainingAccuracy, clf.score(X_train, Y_train))
         testingAccuracy = np.append(testingAccuracy, clf.score(X_test, Y_test))
 
-    plt.plot(neighborsRange, trainingAccuracy, label="Training accuracy")
-    plt.plot(neighborsRange, testingAccuracy, label="Test accuracy")
-    plt.ylabel("Accuracy")
-    plt.xlabel("n_neighbors")
-    plt.legend()
+    fig, ax = plt.subplots()
+    fig.suptitle("Accuracy vs. N_Neighbors")
+    ax.plot(neighborsRange, trainingAccuracy, label="Training accuracy")
+    ax.plot(neighborsRange, testingAccuracy, label="Test accuracy")
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("n_neighbors")
+    ax.set_xticks(neighborsRange)
+    ax.legend()
 
 """
 
 """
 def crossValidation():
-    logreg = LogisticRegression();
-
+    print("\nRunning crossValidation")
+    clf = KNeighborsClassifier(n_neighbors=5)
+    scores = cross_val_score(clf, X_train, Y_train, cv=5)
+    print("Cross-validation training scores: {}".format(scores))
+    
+    scores = cross_val_score(clf, X_test, Y_test, cv=5)
+    print("Cross-validation testing scores: {}".format(scores))
 
 csvToNumPyArray()
-#createHistograms()
-#createScatterPlot()
+createHistograms()
+createScatterPlot()
 findK()
+crossValidation()
 
