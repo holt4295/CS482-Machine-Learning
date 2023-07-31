@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+Garrett Holtz
+Sean Timkovich-Camp
 
-This is a temporary script file.
+Assignment 2
+
+TO DO:
+    1. Print first 5 datasets
+    2. Scatterplot
+    3. Split training and test data
+    4. Compute best # of neighbors to use
+    5. Train data using 5-fold StratifiedKFold
 """
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,18 +37,22 @@ def csvToNumPyArray():
                 headers = row
             else:
                 if row[0] == "M":
-                    targets = np.append(targets, [0])
+                    targets = np.append(targets, 0)
                 else:
-                    targets = np.append(targets, [1])
+                    targets = np.append(targets, 1)
                     
     data = np.genfromtxt(filePath, delimiter=",", skip_header=1, dtype=float)
+    
     print("data-numpy array of shape ", data.shape)
+    data = np.delete(data, 0, 1)
+    
     print("target-numpy array of shape ", len(targets))
+    
     target_name = headers.pop(0)
     headers.pop() #Remove trailing header
+    
     print("Target Name: ", target_name)
     print("Feature Names: ", headers)
-    data = np.delete(data, 0, 1)
 
 """
 
@@ -75,10 +87,30 @@ def createHistograms():
 
 """
 def createScatterPlot():
-    return 0
+    #perimeter x symmetry
+    
+    fig, ax = plt.subplots()
+    #plt.scatter(perimeterData, symmetryData, c=targets, label=targets)
+    
+    color1 = 'tab:blue'
+    color2 = "tab:orange"
+    
+    for i in range(len(data)):
+        if targets[i] == 0:
+            ax.scatter(data[i, 2], data[i, 27], c=color1, label=color1, alpha=0.3)
+        else:
+            ax.scatter(data[i, 2], data[i, 27], c=color2, label=color2, alpha=0.3)
+    
+    fig.suptitle("Perimeter vs. Symmetry Scatter Plot")
+    ax.set_xlabel("Perimeter")
+    ax.set_ylabel("Symmetry")
+    ax.legend() # Add a legend.
+    #ax.grid(True)
+    
+    plt.show()
 
 
 csvToNumPyArray()
 #createHistograms()
-
+createScatterPlot()
 
