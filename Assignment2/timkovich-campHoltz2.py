@@ -86,20 +86,30 @@ def createHistograms():
 """
 
 """
+
 def createScatterPlot():
     #perimeter x symmetry
     
     fig, ax = plt.subplots()
     #plt.scatter(perimeterData, symmetryData, c=targets, label=targets)
     
-    color1 = 'tab:blue'
-    color2 = "tab:orange"
-    
-    for i in range(len(data)):
-        if targets[i] == 0:
-            ax.scatter(data[i, 2], data[i, 27], c=color1, label=color1, alpha=0.3)
+    color1 = 'tab:red'
+    color2 = "tab:blue"
+    data0_perimeter = np.array([])
+    data0_symmetry = np.array([])
+    data1_perimeter = np.array([])
+    data1_symmetry = np.array([])
+    for index, row in enumerate(data):
+        if targets[index] == 0: 
+            data0_perimeter = np.append(data0_perimeter, row[2])
+            data0_symmetry = np.append(data0_symmetry, row[27])
         else:
-            ax.scatter(data[i, 2], data[i, 27], c=color2, label=color2, alpha=0.3)
+            data1_perimeter = np.append(data1_perimeter, row[2])
+            data1_symmetry = np.append(data1_symmetry, row[27])
+        
+    
+    ax.scatter(data0_perimeter, data0_symmetry, c=color1, label="M", alpha=0.5)
+    ax.scatter(data1_perimeter, data1_symmetry, c=color2, label="B", alpha=0.5)
     
     fig.suptitle("Perimeter vs. Symmetry Scatter Plot")
     ax.set_xlabel("Perimeter")
@@ -111,6 +121,6 @@ def createScatterPlot():
 
 
 csvToNumPyArray()
-#createHistograms()
+createHistograms()
 createScatterPlot()
 
