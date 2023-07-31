@@ -15,6 +15,9 @@ TO DO:
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+import math
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 
 
 filePath = "modified_wdbc.csv"
@@ -27,6 +30,7 @@ data = []
 
 """
 def csvToNumPyArray():
+    print("\nRunning csvToNumPyArray")
     global data # To modify global variable, needs to be redefined here
     global targets
     global headers
@@ -53,11 +57,17 @@ def csvToNumPyArray():
     
     print("Target Name: ", target_name)
     print("Feature Names: ", headers)
+    
+    for index, row in enumerate(data):
+        if index > 4:
+            break
+        print("Row ", index, ": ", row)
 
 """
 
 """
 def createHistograms():
+    print("\nRunning createHistograms")
     radius1Data = np.array([])
     texture1Data = np.array([])
     for i in range(len(data)):
@@ -88,6 +98,7 @@ def createHistograms():
 """
 
 def createScatterPlot():
+    print("\nRunning createScatterPlot")
     #perimeter x symmetry
     
     fig, ax = plt.subplots()
@@ -119,8 +130,40 @@ def createScatterPlot():
     
     plt.show()
 
+"""
+
+"""
+def findK():
+    print("\nRunning findK")
+    X_train, X_test, Y_train, Y_test = train_test_split(data, targets, random_state=42)
+    
+    trainingAccuracy = np.array([])
+    testingAccuracy = np.array([])
+    
+    numSamples = int(math.sqrt(len(data)) + 3)
+    neighborsRange = range(1, numSamples, 2) #Only want odd numbers so iterate by 2
+    
+    for n_neighbors in neighborsRange:
+        clf = KNeighborsClassifier(n_neighbors=n_neighbors)
+        clf.fit(X_train, Y_train)
+        trainingAccuracy = np.append(trainingAccuracy, clf.score(X_train, Y_train))
+        testingAccuracy = np.append(testingAccuracy, clf.score(X_test, Y_test))
+
+    plt.plot(neighborsRange, trainingAccuracy, label="Training accuracy")
+    plt.plot(neighborsRange, testingAccuracy, label="Test accuracy")
+    plt.ylabel("Accuracy")
+    plt.xlabel("n_neighbors")
+    plt.legend()
+
+"""
+
+"""
+def crossValidation():
+    logreg = LogisticRegression();
+
 
 csvToNumPyArray()
-createHistograms()
-createScatterPlot()
+#createHistograms()
+#createScatterPlot()
+findK()
 
