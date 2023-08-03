@@ -5,12 +5,16 @@ Sean Timkovich-Camp
 
 Assignment 2
 """
+
+"""
+Imports
+"""
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import math
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.neighbors import KNeighborsClassifier
 
 """
 Global Declarations
@@ -27,7 +31,7 @@ Y_train = np.array([])
 Y_test = np.array([])
 
 """
-
+Import data from .csv to multiple numpy arrays
 """
 def csvToNumPyArray():
     print("\nRunning csvToNumPyArray")
@@ -47,7 +51,7 @@ def csvToNumPyArray():
                     
     data = np.genfromtxt(filePath, delimiter=",", skip_header=1, dtype=float)
     
-    print("data-numpy array of shape ", data.shape)
+    print("\ndata-numpy array of shape ", data.shape)
     data = np.delete(data, 0, 1)
     
     print("target-numpy array of shape ", len(targets))
@@ -64,7 +68,7 @@ def csvToNumPyArray():
         print("Row ", index, ": ", row)
 
 """
-
+Create Histograms based off features 1 and 2
 """
 def createHistograms():
     print("\nRunning createHistograms")
@@ -77,31 +81,28 @@ def createHistograms():
     
     #Radius1 Hist
     fig1, ax1 = plt.subplots()
-    plt.hist(radius1Data, facecolor="blue", edgecolor="gray")
 
-    #ax1.set_xticks(bins)
     fig1.suptitle("Radius1 Data Histogram")
     ax1.set_xlabel("Radius1 Data Value")
     ax1.set_ylabel("Frequency")
+    ax1.hist(radius1Data, facecolor="blue", edgecolor="gray")
     
     #Texture1 Hist
     fig2, ax2 = plt.subplots()
-    plt.hist(texture1Data, facecolor="blue", edgecolor="gray")
-
-    #ax2.set_xticks(bins)
+    
     fig2.suptitle("Texture1 Data Histogram")
     ax2.set_xlabel("Texture1 Data Value")
     ax2.set_ylabel("Frequency")
+    ax2.hist(texture1Data, facecolor="blue", edgecolor="gray")
 
 """
-
+Create a scatterplot comparing features 3 and 28
 """
 def createScatterPlot():
     print("\nRunning createScatterPlot")
     #perimeter x symmetry
     
     fig, ax = plt.subplots()
-    #plt.scatter(perimeterData, symmetryData, c=targets, label=targets)
     
     color1 = 'tab:red'
     color2 = "tab:blue"
@@ -118,8 +119,8 @@ def createScatterPlot():
             data1_symmetry = np.append(data1_symmetry, row[27])
         
     
-    ax.scatter(data0_perimeter, data0_symmetry, c=color1, label="M", alpha=0.5)
-    ax.scatter(data1_perimeter, data1_symmetry, c=color2, label="B", alpha=0.5)
+    ax.scatter(data0_perimeter, data0_symmetry, c=color1, label="Malignant", alpha=0.5)
+    ax.scatter(data1_perimeter, data1_symmetry, c=color2, label="Benign", alpha=0.5)
     
     fig.suptitle("Perimeter vs. Symmetry Scatter Plot")
     ax.set_xlabel("Perimeter")
@@ -130,7 +131,7 @@ def createScatterPlot():
     plt.show()
 
 """
-
+Find the best number of neighbors to be used for K-NN
 """
 def findK():
     print("\nRunning findK")
@@ -140,7 +141,7 @@ def findK():
     global Y_test
     X_train, X_test, Y_train, Y_test = train_test_split(data, targets, random_state=42)
     
-    print(len(X_train), len(Y_train), len(X_test), len(Y_test))
+    print("\n", len(X_train), len(Y_train), len(X_test), len(Y_test))
     
     trainingAccuracy = np.array([])
     testingAccuracy = np.array([])
@@ -164,17 +165,21 @@ def findK():
     ax.legend()
 
 """
-
+Cross validate with StratifiedKFold the number of neighbors found against 
+the training and test data
 """
 def crossValidation():
-    print("\nRunning crossValidation")
+    print("\nRunning crossValidation with StratifiedKFold")
     clf = KNeighborsClassifier(n_neighbors=5)
     scores = cross_val_score(clf, X_train, Y_train, cv=5)
-    print("Cross-validation training scores: {}".format(scores))
+    print("\nCross-validation with StratifiedKFold training scores:\n {}".format(scores))
     
     scores = cross_val_score(clf, X_test, Y_test, cv=5)
-    print("Cross-validation testing scores: {}".format(scores))
+    print("\nCross-validation with StratifiedKFold testing scores:\n {}".format(scores))
 
+"""
+Run functions
+"""
 csvToNumPyArray()
 createHistograms()
 createScatterPlot()
