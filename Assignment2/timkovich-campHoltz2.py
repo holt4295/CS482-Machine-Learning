@@ -50,6 +50,7 @@ def csvToNumPyArray():
                     targets = np.append(targets, 1)
                     
     data = np.genfromtxt(filePath, delimiter=",", skip_header=1, dtype=float)
+    np.set_printoptions(precision=3, suppress=True)
     
     print("\ndata-numpy array of shape ", data.shape)
     data = np.delete(data, 0, 1)
