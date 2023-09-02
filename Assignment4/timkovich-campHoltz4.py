@@ -270,8 +270,7 @@ def usePCA(xTrain, xTest, headers):
     xTrain_pca = pca.transform(xTrain)
     xTest_pca = pca.transform(xTest)
     headers_trans = pca.get_feature_names_out(headers)
-    print("shapes for Garrett: ", xTrain_pca.shape)
-    print("shapes for Garriett: ", xTest_pca.shape)
+    
     return xTrain_pca, xTest_pca, headers_trans
 
 def machineLearningModel(xTrain, xTest, yTrain, yTest, headers):
@@ -303,8 +302,6 @@ def machineLearningModel(xTrain, xTest, yTrain, yTest, headers):
             
     all_scores = np.reshape(all_scores, (-1,len(scores)))
     all_scores = np.transpose(all_scores)
-    print(all_scores)
-    print(all_scores.shape)
     x = np.arange(len(parameters['epsilon']))
     width = .15
     multiplier = 0
@@ -313,7 +310,6 @@ def machineLearningModel(xTrain, xTest, yTrain, yTest, headers):
     
     for index, c in enumerate(parameters['C']):
         offset = width * multiplier
-        print(all_scores[index], "\n")
         rects = ax.bar(x + offset, all_scores[index], width, label="Cost: " + str(c))
         multiplier += 1
     
