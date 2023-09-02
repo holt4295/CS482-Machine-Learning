@@ -282,29 +282,47 @@ def machineLearningModel(xTrain, xTest, yTrain, yTest, headers):
     xTest_Temp = np.array(xTest, dtype=np.float64)
     yTest_Temp = np.array(yTest, dtype=np.float64)
     
-    parameters = {'epsilon': [0.1, 1, 10, 20, 50, 100, 1000, 10000, 100000, 1000000],
-                  'C': [0.1, 1, 10, 20, 50, 100, 1000, 10000, 100000, 1000000]}
+    parameters = {'epsilon': [20, 50, 100, 1000, 10000],
+                  'C': [20, 50, 100, 1000, 10000]}
     
-    line = np.linspace(-3, 3, 1000, endpoint=False).reshape(-1, 1)
-    svm = SVR(C=100000, epsilon=100000).fit(xTrain_Temp, yTrain_Temp)
-    
-    scores = np.array([])
+
+    all_scores = np.array([])
     for ep in parameters['epsilon']:
+        scores = np.array([])
         for c in parameters['C']:
             svm = SVR(C=c, epsilon=ep)
             svm.fit(xTrain_Temp, yTrain_Temp)
             
-            scores = np.append(scores, r2_score(yTest_Temp, svm.predict(xTest_Temp)))
-            
+            scores = np.append(scores, float("{:.2f}".format(r2_score(yTest_Temp, svm.predict(xTest_Temp)))))
+            """
             print("Epsilon =", ep, ",C =", c, "Score =", svm.score(xTest_Temp, yTest_Temp))
-            print("R2 =", r2_score(yTest_Temp, svm.predict(xTest_Temp)))
+            print("R2 =", float("{:.2f}".format(r2_score(yTest_Temp, svm.predict(xTest_Temp)))))
             print("RMSE: ", mean_absolute_error(yTest_Temp, svm.predict(xTest_Temp)))
+            """
+        all_scores = np.append(all_scores, scores)
             
-    fig, ax = plt.subplots()
-    ax.scatter_3d(y=scores, x=parameters['C'])
-            
-    #svm.fit(xTrain_Temp, yTrain_Temp)
-    #trainPred = svm.predict(xTrain)
+    all_scores = np.reshape(all_scores, (-1,len(scores)))
+    all_scores = np.transpose(all_scores)
+    print(all_scores)
+    print(all_scores.shape)
+    x = np.arange(len(parameters['epsilon']))
+    width = .15
+    multiplier = 0
+    
+    fig, ax = plt.subplots(layout='constrained')
+    
+    for index, c in enumerate(parameters['C']):
+        offset = width * multiplier
+        print(all_scores[index], "\n")
+        rects = ax.bar(x + offset, all_scores[index], width, label="Cost: " + str(c))
+        multiplier += 1
+    
+    ax.set_ylabel('R Squared')
+    ax.set_xlabel('Epsilon')
+    ax.set_title('SVR Regression Scores by parameter')
+    ax.set_xticks(x + width, parameters['epsilon'])
+    ax.legend(loc='upper left', ncols=3)
+    ax.set_ylim(0, 1)
     
 
 
