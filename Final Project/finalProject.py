@@ -15,7 +15,7 @@ from sklearn.metrics import confusion_matrix, classification_report, roc_curve, 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.decomposition import PCA
 from sklearn.svm import SVR
-from sklearn.feature_selection import SelectPercentile,  mutual_info_regression, SelectFromModel
+from sklearn.feature_selection import SelectPercentile, f_regression, SelectFromModel, SelectKBest, r_regression, mutual_info_regression
 from sklearn.preprocessing import StandardScaler, normalize
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.neighbors import KNeighborsRegressor
@@ -41,18 +41,22 @@ def main():
     norm_data = normalizeData(data)
     std_norm_data = normalizeData(std_data)
     
+    r_data, targets, r_headers = featureSelection(std_data, targets, headers)
     #split raw data into training and test
     printHeader("Raw data modeling")
-    xTrain, xTest, yTrain, yTest = train_test_split(data, targets, test_size = 0.2, random_state=42)
+    #xTrain, xTest, yTrain, yTest = train_test_split(data, targets, test_size = 0.2, random_state=42)
+    xTrain, xTest, yTrain, yTest = train_test_split(r_data, targets, test_size = 0.2, random_state=42)
     
     xTrain = np.array(xTrain, dtype=np.float64)
     xTest = np.array(xTest, dtype=np.float64)
     yTrain = np.array(yTrain, dtype=np.float64)
     yTest = np.array(yTest, dtype=np.float64)
+    
+    fitLinearRegression(xTrain, xTest, yTrain, yTest)
     fitKNN(xTrain, xTest, yTrain, yTest)
     fitDecisionTree(xTrain, xTest, yTrain, yTest)
     fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
-    # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    #fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     printHeader("standardized data modeling")
     #split standardize data into training and test
@@ -64,9 +68,10 @@ def main():
     yTest = np.array(yTest, dtype=np.float64)
     #print("Waka\n", xTrain[:5])
     
-    fitKNN(xTrain, xTest, yTrain, yTest)
-    fitDecisionTree(xTrain, xTest, yTrain, yTest)
-    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    fitLinearRegression(xTrain, xTest, yTrain, yTest)
+    # fitKNN(xTrain, xTest, yTrain, yTest)
+    # fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    # fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
     # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     printHeader("normalized data modeling")
@@ -77,9 +82,11 @@ def main():
     xTest = np.array(xTest, dtype=np.float64)
     yTrain = np.array(yTrain, dtype=np.float64)
     yTest = np.array(yTest, dtype=np.float64)
-    fitKNN(xTrain, xTest, yTrain, yTest)
-    fitDecisionTree(xTrain, xTest, yTrain, yTest)
-    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    
+    fitLinearRegression(xTrain, xTest, yTrain, yTest)
+    # fitKNN(xTrain, xTest, yTrain, yTest)
+    # fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    # fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
     # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     # print("Testing with standardized and normalized data")
@@ -168,6 +175,38 @@ def normalizeData(data):
 
 def featureSelection(data, targets, headers):
     print("Running feature selection")
+    
+    select = SelectPercentile(score_func=mutual_info_regression, percentile=50)
+    
+    #select = SelectFromModel(Ridge(), threshold = "median")
+
+    selected_features = select.fit_transform(data, targets)
+    selected_headers = select.get_feature_names_out(headers)
+
+    mask = select.get_support()
+    plt.matshow(mask.reshape(1,-1), cmap='gray_r')
+    plt.xlabel("Select 70%")
+    plt.yticks(())
+    
+    print("Finished feature selection")
+    return selected_features, targets, selected_headers
+
+def fitLinearRegression(xTrain, xTest, yTrain, yTest):
+    print("Fitting Linear model")
+    #lin_reg = LinearRegression().fit(xTrain, yTrain)
+    
+    parameters = {
+        'alpha': np.arange(0.1, 3, step = 0.1)
+        }
+    
+    lin_reg = GridSearchCV(Ridge(), parameters).fit(xTrain, yTrain)
+    
+    prediction = lin_reg.predict(xTest)
+    print("Training: ", lin_reg.score(xTrain, yTrain))
+    print("Test: ", lin_reg.score(xTest, yTest))
+    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
+    print("r2: ", r2_score(yTest, prediction))
+    print("Finished fitting linear model")
     return 0
 
 def fitGradientBoosting(xTrain, xTest, yTrain, yTest):
