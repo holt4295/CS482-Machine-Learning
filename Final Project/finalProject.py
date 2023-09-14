@@ -235,7 +235,7 @@ def fitKNN(xTrain, xTest, yTrain, yTest):
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
     
-    print("Finished fitting KNN model for regression")
+    print("Finished fitting KNN model for regression\n")
     return 0
 
 def fitDecisionTree(xTrain, xTest, yTrain, yTest):
@@ -248,7 +248,7 @@ def fitDecisionTree(xTrain, xTest, yTrain, yTest):
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
     
-    print("Finished fitting Decision Tree")
+    print("Finished fitting Decision Tree\n")
     return 0
 
 def fitNeuralNetwork(xTrain, xTest, yTrain, yTest):
@@ -259,7 +259,7 @@ def fitNeuralNetwork(xTrain, xTest, yTrain, yTest):
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
     
-    print("Finished fitting Neural Network")
+    print("Finished fitting Neural Network\n")
     return 0
 
 def printHeader(title):
