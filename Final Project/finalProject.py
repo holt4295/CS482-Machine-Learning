@@ -42,7 +42,7 @@ def main():
     std_norm_data = normalizeData(std_data)
     
     #split raw data into training and test
-    print("Testing with raw data")
+    printHeader("Raw data modeling")
     xTrain, xTest, yTrain, yTest = train_test_split(data, targets, test_size = 0.2, random_state=42)
     
     xTrain = np.array(xTrain, dtype=np.float64)
@@ -54,7 +54,7 @@ def main():
     fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
     # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
-    print("Testing with standardized data")
+    printHeader("standardized data modeling")
     #split standardize data into training and test
     xTrain, xTest, yTrain, yTest = train_test_split(std_data, targets, test_size = 0.2, random_state=42)
     
@@ -69,7 +69,7 @@ def main():
     fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
     # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
-    print("Testing with normalized data")
+    printHeader("normalized data modeling")
     #split normalized data into training and test
     xTrain, xTest, yTrain, yTest = train_test_split(norm_data, targets, test_size = 0.2, random_state=42)
     
@@ -234,9 +234,12 @@ def fitKNN(xTrain, xTest, yTrain, yTest):
     print("Test: ", knn.score(xTest, yTest))
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
+    
+    print("Finished fitting KNN model for regression")
     return 0
 
 def fitDecisionTree(xTrain, xTest, yTrain, yTest):
+    print("Fitting Decision Tree")
     d_tree = DecisionTreeRegressor(max_depth=10).fit(xTrain, yTrain)
     prediction = d_tree.predict(xTest)
     print("Scores Decision Tree: ")
@@ -244,13 +247,25 @@ def fitDecisionTree(xTrain, xTest, yTrain, yTest):
     print("Test: ", d_tree.score(xTest, yTest))
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
+    
+    print("Finished fitting Decision Tree")
     return 0
 
 def fitNeuralNetwork(xTrain, xTest, yTrain, yTest):
+    print("Fitting Neural Network")
     nn = MLPRegressor(random_state=42, max_iter=500).fit(xTrain, yTrain)
     prediction = nn.predict(xTest)
     print("Score: ", nn.score(xTest, yTest))
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
+    
+    print("Finished fitting Neural Network")
     return 0
+
+def printHeader(title):
+    print()
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+    print("\t\t\tStarting ", title, "\n")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+    
 main()
