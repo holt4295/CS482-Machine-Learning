@@ -12,12 +12,15 @@ Imports
 """
 from sklearn.linear_model import Ridge, Lasso, LinearRegression, LogisticRegression
 from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc, r2_score, mean_squared_error
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.decomposition import PCA
 from sklearn.svm import SVR
 from sklearn.feature_selection import SelectPercentile,  mutual_info_regression, SelectFromModel
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, normalize
 from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.neural_network import MLPRegressor
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -32,16 +35,62 @@ filePathReg = "val_stats_cut.csv"
 Main function
 """
 def main():
+    print(np.arange(0, 2, 0.1))
     data, targets, headers = csvToNumPyArray(filePathReg)
     std_data = standardizeData(data)
+    norm_data = normalizeData(data)
+    std_norm_data = normalizeData(std_data)
     
-    #split data into training and test
+    #split raw data into training and test
+    print("Testing with raw data")
     xTrain, xTest, yTrain, yTest = train_test_split(data, targets, test_size = 0.2, random_state=42)
+    
     xTrain = np.array(xTrain, dtype=np.float64)
     xTest = np.array(xTest, dtype=np.float64)
     yTrain = np.array(yTrain, dtype=np.float64)
     yTest = np.array(yTest, dtype=np.float64)
-    fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    fitKNN(xTrain, xTest, yTrain, yTest)
+    fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    
+    print("Testing with standardized data")
+    #split standardize data into training and test
+    xTrain, xTest, yTrain, yTest = train_test_split(std_data, targets, test_size = 0.2, random_state=42)
+    
+    xTrain = np.array(xTrain, dtype=np.float64)
+    xTest = np.array(xTest, dtype=np.float64)
+    yTrain = np.array(yTrain, dtype=np.float64)
+    yTest = np.array(yTest, dtype=np.float64)
+    #print("Waka\n", xTrain[:5])
+    
+    fitKNN(xTrain, xTest, yTrain, yTest)
+    fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    
+    print("Testing with normalized data")
+    #split normalized data into training and test
+    xTrain, xTest, yTrain, yTest = train_test_split(norm_data, targets, test_size = 0.2, random_state=42)
+    
+    xTrain = np.array(xTrain, dtype=np.float64)
+    xTest = np.array(xTest, dtype=np.float64)
+    yTrain = np.array(yTrain, dtype=np.float64)
+    yTest = np.array(yTest, dtype=np.float64)
+    fitKNN(xTrain, xTest, yTrain, yTest)
+    fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    
+    # print("Testing with standardized and normalized data")
+    # #split normalized data into training and test
+    # xTrain, xTest, yTrain, yTest = train_test_split(std_norm_data, targets, test_size = 0.2, random_state=42)
+    
+    # xTrain = np.array(xTrain, dtype=np.float64)
+    # xTest = np.array(xTest, dtype=np.float64)
+    # yTrain = np.array(yTrain, dtype=np.float64)
+    # yTest = np.array(yTest, dtype=np.float64)
+    # # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     return 0
 
@@ -49,9 +98,10 @@ def main():
 """
 Import data from .csv to multiple numpy arrays
 """
-def csvToNumPyArray(fileLocation):
+def csvToNumPyArray(fileLocation, preprocessData = True):
     # Preprocess the csv before reading
-    fileLocation = preprocessCSV(fileLocation)
+    if preprocessData:
+        fileLocation = preprocessCSV(fileLocation)
     
     print("\nRunning csvToNumPyArray")
     target_name = "win_percent"
@@ -66,7 +116,7 @@ def csvToNumPyArray(fileLocation):
             else:
                 targets = np.append(targets, row[targetIndex])
                 
-                    
+    print("Target collected")
     data = np.genfromtxt(fileLocation, delimiter=",", skip_header=1, dtype=float)
     np.set_printoptions(precision=3, suppress=True)
     
@@ -92,6 +142,7 @@ def csvToNumPyArray(fileLocation):
 Preprocess the csv file
 """
 def preprocessCSV(fileLocation):
+    print("Preprocessing data")
     data = pd.read_csv(fileLocation, header=0)
 
     # Update the file path with the processed csv
@@ -105,15 +156,22 @@ def preprocessCSV(fileLocation):
     return outputFile
 
 def standardizeData(data):
+    print("Standardizing data")
     std_scaler = StandardScaler().fit(data)
     std_data = std_scaler.transform(data)
     
     return std_data
 
+def normalizeData(data):
+    print("Normalizing data")
+    return normalize(data)
+
 def featureSelection(data, targets, headers):
+    print("Running feature selection")
     return 0
 
 def fitGradientBoosting(xTrain, xTest, yTrain, yTest):
+    print("Running Gradient Boosting Regressor")
     params = {
         "n_estimators": 500,
         "max_depth": 4,
@@ -150,4 +208,49 @@ def fitGradientBoosting(xTrain, xTest, yTrain, yTest):
     plt.show()
     return 0
 
+def fitKNN(xTrain, xTest, yTrain, yTest):
+    print("Fitting KNN model for regression")
+    
+    knn = KNeighborsRegressor(n_neighbors=3).fit(xTrain, yTrain)
+    prediction = knn.predict(xTest)
+    print("Scores 3KNN: ")
+    print("Training: ", knn.score(xTrain, yTrain))
+    print("Test: ", knn.score(xTest, yTest))
+    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
+    print("r2: ", r2_score(yTest, prediction))
+    
+    knn = KNeighborsRegressor(n_neighbors=5).fit(xTrain, yTrain)
+    prediction = knn.predict(xTest)
+    print("Scores 5KNN: ")
+    print("Training: ", knn.score(xTrain, yTrain))
+    print("Test: ", knn.score(xTest, yTest))
+    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
+    print("r2: ", r2_score(yTest, prediction))
+    
+    knn = KNeighborsRegressor(n_neighbors=7).fit(xTrain, yTrain)
+    prediction = knn.predict(xTest)
+    print("Scores 7KNN: ")
+    print("Training: ", knn.score(xTrain, yTrain))
+    print("Test: ", knn.score(xTest, yTest))
+    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
+    print("r2: ", r2_score(yTest, prediction))
+    return 0
+
+def fitDecisionTree(xTrain, xTest, yTrain, yTest):
+    d_tree = DecisionTreeRegressor(max_depth=10).fit(xTrain, yTrain)
+    prediction = d_tree.predict(xTest)
+    print("Scores Decision Tree: ")
+    print("Training: ", d_tree.score(xTrain, yTrain))
+    print("Test: ", d_tree.score(xTest, yTest))
+    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
+    print("r2: ", r2_score(yTest, prediction))
+    return 0
+
+def fitNeuralNetwork(xTrain, xTest, yTrain, yTest):
+    nn = MLPRegressor(random_state=42, max_iter=500).fit(xTrain, yTrain)
+    prediction = nn.predict(xTest)
+    print("Score: ", nn.score(xTest, yTest))
+    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
+    print("r2: ", r2_score(yTest, prediction))
+    return 0
 main()
