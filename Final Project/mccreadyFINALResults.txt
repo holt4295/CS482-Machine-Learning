@@ -1,0 +1,161 @@
+ Final Project Investigations
+ 
+ REGRESSION TASK
+ 
+-------------------------------------------------------------------------------
+ Investigation 1 - All the data determining Winrate
+ 
+ We will be using feature columns 2-16 and 18-23 to predict 17
+ -------------------------------------------------------------------------------
+ 
+ (Win_percent)
+ 
+ 
+ Model          Best Parameters           R^2            RSME
+
+ Linear         NONE                      0.2682...      0.8587...
+
+ SVM            C = 10                    0.2791...      0.8523...
+                gamma = 0.001
+
+ Tree-Based     max_depth = 3             0.1594...      0.9204...
+
+ NN             hidden-layers = 20        0.1504...      0.9253...
+
+-------------------------------------------------------------------------------
+ Investigation 2   All the data determining Winrate using Feature Reduction
+ 
+ We will be using feature columns 2-16 and 18-23 to predict 17
+ -------------------------------------------------------------------------------
+
+ (Win_percent)
+
+ Model          Best Parameters           R^2            RSME
+
+ Linear         NONE                      0.2704...      0.8574...
+
+ SVM            C = 10                    0.3036...      0.8377...
+                gamma = 0.01
+
+ Tree-Based     max_depth = 3             0.1594...      0.9204...
+
+ NN             hidden-layers = 10        0.3024...      0.8384...
+
+
+ CLASSIFICATION TASK
+ 
+-------------------------------------------------------------------------------
+ Investigation 3 - All the data determining Rating
+ 
+ We will be using feature columns 2-16 and 18-23 to predict 17
+ -------------------------------------------------------------------------------
+ 
+(Rating)
+ 
+Stats For Immortal 1:
+
+Precision:
+0.6411297029373607
+Recall:
+0.9388639906469213
+Specificity:
+0.5153421088099196
+Accuracy:
+0.7185360039264262
+
+
+Stats For Immortal 2:
+ 
+Precision:
+0.27529210601310916
+Recall:
+0.05844980940279543
+Specificity:
+0.9631700146277173
+Accuracy:
+0.7884404141444832
+
+
+Stats For Immortal 3:
+ 
+Precision:
+0.34501805821117487
+Recall:
+0.18477642507680053
+Specificity:
+0.9598489288272449
+Accuracy:
+0.8802439993455956
+
+
+Stats For Radiant:
+ 
+Precision:
+0.26229508196721313
+Recall:
+0.01532567049808429
+Specificity:
+0.9989219749419064
+Accuracy:
+0.9749222894804497
+ 
+-------------------------------------------------------------------------------
+ Investigation 4   All the data determining Rating using Feature Reduction
+ 
+ We will be using feature columns 2-16 and 18-23 to predict 17
+ -------------------------------------------------------------------------------
+  
+(Rating)
+
+Stats For Immortal 1:
+  
+Precision:
+0.6393011366456545
+Recall:
+0.941153546375682
+Specificity:
+0.5102879734040163
+Accuracy:
+0.7170051651202468
+
+
+Stats For Immortal 2:
+
+
+
+Precision:
+0.2863247863247863
+Recall:
+0.056755612028801354
+Specificity:
+0.966139006763509
+Accuracy:
+0.7905087994016874
+
+
+Stats For Immortal 3:
+
+
+
+Precision:
+0.3459227467811159
+Recall:
+0.18341108203436113
+Specificity:
+0.9603047470209025
+Accuracy:
+0.880512772571108
+
+
+Stats For Radiant:
+
+
+
+Precision:
+0.25301204819277107
+Recall:
+0.010057471264367816
+Specificity:
+0.9992573605155355
+Accuracy:
+0.9751209479514806
