@@ -42,7 +42,7 @@ def main():
     createScatters(dataC0, dataC1, dataC2, dataC3, kmeans)
     
     print("\nRunning kmeans with target")
-    dataStats(processedData)
+    dataStatsWithTarget(processedData)
     return 0
 
 def processCSV():
@@ -59,11 +59,11 @@ def processCSV():
 def determineClusterNum(data):
     wcss = []
     for i in range(1,10):
-        k_means = KMeans(n_clusters=i, 
+        kmeans = KMeans(n_clusters=i, 
                          random_state=42, 
                          n_init='auto')
-        k_means.fit(data)
-        wcss.append(k_means.inertia_)
+        kmeans.fit(data)
+        wcss.append(kmeans.inertia_)
     #plot elbow curve
     plt.plot(np.arange(1,10), wcss)
     plt.xlabel('Clusters')
@@ -221,7 +221,11 @@ def createScatters(dataC0, dataC1, dataC2, dataC3, kmeans):
     
     return 0
 
-def dataStats(data):
+def dataStatsWithoutTarget(data):
+    
+    return 0
+
+def dataStatsWithTarget(data):
     data_features = data.drop(columns = ['kd_ratio'])
     
     DATA_TRAIN, DATA_TEST, TARGET_TRAIN, TARGET_TEST = train_test_split(
@@ -248,7 +252,11 @@ def dataStats(data):
     kmeans = KMeans(n_clusters=3, random_state=42, n_init='auto')
     kmeans.fit(DATA_TRAIN, TARGET_TRAIN)
 
-    plt.hist(kmeans.labels_, facecolor="blue", align='mid', orientation='horizontal', bins=5)
+    plt.hist(kmeans.labels_, 
+             facecolor="blue", 
+             align='mid', 
+             orientation='horizontal', 
+             bins=5)
     plt.yticks([0,1,2])
     plt.xlabel("Number of Occurrences")
     plt.title("Clusters Based off ValStats")
