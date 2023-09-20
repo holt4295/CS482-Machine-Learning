@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import csv
+import mglearn
 
 """
 Global Declarations
@@ -38,29 +39,12 @@ def main():
     print(np.arange(0, 2, 0.1))
     data, targets, headers = csvToNumPyArray(filePathReg)
     std_data = standardizeData(data)
+    data, targets, headers = featureSelection(std_data, targets, headers)
     norm_data = normalizeData(data)
-    std_norm_data = normalizeData(std_data)
-    
-    r_data, targets, r_headers = featureSelection(std_data, targets, headers)
-    #split raw data into training and test
-    printHeader("Raw data modeling")
-    #xTrain, xTest, yTrain, yTest = train_test_split(data, targets, test_size = 0.2, random_state=42)
-    xTrain, xTest, yTrain, yTest = train_test_split(r_data, targets, test_size = 0.2, random_state=42)
-    
-    xTrain = np.array(xTrain, dtype=np.float64)
-    xTest = np.array(xTest, dtype=np.float64)
-    yTrain = np.array(yTrain, dtype=np.float64)
-    yTest = np.array(yTest, dtype=np.float64)
-    
-    fitLinearRegression(xTrain, xTest, yTrain, yTest)
-    fitKNN(xTrain, xTest, yTrain, yTest)
-    fitDecisionTree(xTrain, xTest, yTrain, yTest)
-    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
-    #fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     printHeader("standardized data modeling")
     #split standardize data into training and test
-    xTrain, xTest, yTrain, yTest = train_test_split(std_data, targets, test_size = 0.2, random_state=42)
+    xTrain, xTest, yTrain, yTest = train_test_split(data, targets, test_size = 0.2, random_state=42)
     
     xTrain = np.array(xTrain, dtype=np.float64)
     xTest = np.array(xTest, dtype=np.float64)
@@ -69,10 +53,10 @@ def main():
     #print("Waka\n", xTrain[:5])
     
     fitLinearRegression(xTrain, xTest, yTrain, yTest)
-    # fitKNN(xTrain, xTest, yTrain, yTest)
-    # fitDecisionTree(xTrain, xTest, yTrain, yTest)
-    # fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
-    # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    fitKNN(xTrain, xTest, yTrain, yTest)
+    fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     printHeader("normalized data modeling")
     #split normalized data into training and test
@@ -84,20 +68,11 @@ def main():
     yTest = np.array(yTest, dtype=np.float64)
     
     fitLinearRegression(xTrain, xTest, yTrain, yTest)
-    # fitKNN(xTrain, xTest, yTrain, yTest)
-    # fitDecisionTree(xTrain, xTest, yTrain, yTest)
-    # fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
-    # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
+    fitKNN(xTrain, xTest, yTrain, yTest)
+    fitDecisionTree(xTrain, xTest, yTrain, yTest)
+    fitNeuralNetwork(xTrain, xTest, yTrain, yTest)
+    fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
-    # print("Testing with standardized and normalized data")
-    # #split normalized data into training and test
-    # xTrain, xTest, yTrain, yTest = train_test_split(std_norm_data, targets, test_size = 0.2, random_state=42)
-    
-    # xTrain = np.array(xTrain, dtype=np.float64)
-    # xTest = np.array(xTest, dtype=np.float64)
-    # yTrain = np.array(yTrain, dtype=np.float64)
-    # yTest = np.array(yTest, dtype=np.float64)
-    # # fitGradientBoosting(xTrain, xTest, yTrain, yTest)
     
     return 0
 
@@ -182,10 +157,20 @@ def featureSelection(data, targets, headers):
 
     selected_features = select.fit_transform(data, targets)
     selected_headers = select.get_feature_names_out(headers)
-
+    print("Selected Headers:\n", selected_headers)
     mask = select.get_support()
     plt.matshow(mask.reshape(1,-1), cmap='gray_r')
-    plt.xlabel("Select 70%")
+    plt.xlabel("Select 50%")
+    plt.yticks(())
+    
+    select = SelectFromModel(Ridge(), threshold = "median")
+
+    selected_features = select.fit_transform(selected_features, targets)
+    selected_headers = select.get_feature_names_out(selected_headers)
+    print("Selected Headers:\n", selected_headers)
+    mask = select.get_support()
+    plt.matshow(mask.reshape(1,-1), cmap='gray_r')
+    plt.xlabel("Features after model based reduction")
     plt.yticks(())
     
     print("Finished feature selection")
@@ -196,16 +181,33 @@ def fitLinearRegression(xTrain, xTest, yTrain, yTest):
     #lin_reg = LinearRegression().fit(xTrain, yTrain)
     
     parameters = {
-        'alpha': np.arange(0.1, 3, step = 0.1)
+        'alpha': np.arange(0, 100, step = 1)
         }
     
-    lin_reg = GridSearchCV(Ridge(), parameters).fit(xTrain, yTrain)
+    lin_reg = GridSearchCV(Ridge(), parameters, verbose=1).fit(xTrain, yTrain)
     
     prediction = lin_reg.predict(xTest)
+    print("Parameters: ", lin_reg.best_estimator_)
     print("Training: ", lin_reg.score(xTrain, yTrain))
     print("Test: ", lin_reg.score(xTest, yTest))
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
+    
+    training_accuracy = []
+    test_accuracy = []
+    for alpha in parameters['alpha']:
+        lin_reg = Ridge(alpha=alpha).fit(xTrain, yTrain)
+        training_accuracy.append(lin_reg.score(xTrain, yTrain))
+        test_accuracy.append(lin_reg.score(xTest, yTest))
+    
+    fig, ax = plt.subplots()
+    ax.plot(np.arange(0, 100, step = 1), training_accuracy, label="Training Accuracy")
+    ax.plot(np.arange(0, 100, step = 1), test_accuracy, label="Test Accuracy")
+    ax.set_ylim([0,.3])
+    ax.set_title("Ridge Regression")
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("alpha value")
+    ax.legend()
     print("Finished fitting linear model")
     return 0
 
@@ -221,8 +223,18 @@ def fitGradientBoosting(xTrain, xTest, yTrain, yTest):
     reg = GradientBoostingRegressor(**params)
     reg.fit(xTrain, yTrain)
     
+    print("Training Score: ", reg.score(xTrain, yTrain))
+    print("Test Score: ", reg.score(xTest, yTest))
+    
+    mse = mean_squared_error(yTrain, reg.predict(xTrain), squared=False)
+    print("The root mean squared error (RMSE) on training set: {:.4f}".format(mse))
+    r2 = r2_score(yTrain, reg.predict(xTrain))
+    print("The r squared on training set: {:.4f}".format(r2))
+    
     mse = mean_squared_error(yTest, reg.predict(xTest), squared=False)
     print("The root mean squared error (RMSE) on test set: {:.4f}".format(mse))
+    r2 = r2_score(yTest, reg.predict(xTest))
+    print("The r squared on test set: {:.4f}".format(r2))
     
     test_score = np.zeros((params["n_estimators"],), dtype=np.float64)
     for i, y_pred in enumerate(reg.staged_predict(xTest)):
@@ -250,29 +262,34 @@ def fitGradientBoosting(xTrain, xTest, yTrain, yTest):
 def fitKNN(xTrain, xTest, yTrain, yTest):
     print("Fitting KNN model for regression")
     
-    knn = KNeighborsRegressor(n_neighbors=3).fit(xTrain, yTrain)
+    parameters = {
+        "n_neighbors"   :   [1,2,3,4,5,6,7,8,9,10,11,12],
+        'p'             :   [1,2,5]
+        }
+    
+    knn = GridSearchCV(KNeighborsRegressor(), parameters, verbose=1, scoring='r2').fit(xTrain, yTrain)
+    print("Best Parameters: ", knn.best_estimator_)
+    print("Score: ", knn.best_score_)
+
     prediction = knn.predict(xTest)
-    print("Scores 3KNN: ")
-    print("Training: ", knn.score(xTrain, yTrain))
     print("Test: ", knn.score(xTest, yTest))
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
     
-    knn = KNeighborsRegressor(n_neighbors=5).fit(xTrain, yTrain)
-    prediction = knn.predict(xTest)
-    print("Scores 5KNN: ")
-    print("Training: ", knn.score(xTrain, yTrain))
-    print("Test: ", knn.score(xTest, yTest))
-    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
-    print("r2: ", r2_score(yTest, prediction))
+    training_accuracy = []
+    test_accuracy = []
+    for n_neighbors in parameters['n_neighbors']:
+        knn = KNeighborsRegressor(n_neighbors=n_neighbors).fit(xTrain, yTrain)
+        training_accuracy.append(knn.score(xTrain, yTrain))
+        test_accuracy.append(knn.score(xTest, yTest))
     
-    knn = KNeighborsRegressor(n_neighbors=7).fit(xTrain, yTrain)
-    prediction = knn.predict(xTest)
-    print("Scores 7KNN: ")
-    print("Training: ", knn.score(xTrain, yTrain))
-    print("Test: ", knn.score(xTest, yTest))
-    print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
-    print("r2: ", r2_score(yTest, prediction))
+    fig, ax = plt.subplots()
+    ax.plot(range(1,13), training_accuracy, label="Training Accuracy")
+    ax.plot(range(1,13), test_accuracy, label="Test Accuracy")
+    ax.set_title("KNN Regression")
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("n_neighbors")
+    ax.legend()
     
     print("Finished fitting KNN model for regression\n")
     return 0
@@ -294,7 +311,8 @@ def fitNeuralNetwork(xTrain, xTest, yTrain, yTest):
     print("Fitting Neural Network")
     nn = MLPRegressor(random_state=42, max_iter=500).fit(xTrain, yTrain)
     prediction = nn.predict(xTest)
-    print("Score: ", nn.score(xTest, yTest))
+    print("Score Training: ", nn.score(xTrain, yTrain))
+    print("Score Test: ", nn.score(xTest, yTest))
     print("RMSE: ", np.sqrt(mean_squared_error(yTest, prediction)))
     print("r2: ", r2_score(yTest, prediction))
     
